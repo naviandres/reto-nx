@@ -1,0 +1,176 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <h:head>
+        <title>Departamento</title>
+    </h:head>
+    <h:body>
+        <h:form id="form-departamento">
+            <p:menubar>               
+
+                <p:divider layout="vertical"/>
+                <p:menuitem value="Inicio" icon="pi pi-fw pi-angle-left" outcome="/index.xhtml"/>
+
+            </p:menubar>
+            <p:growl id="growl" showDetail="true" />
+            <div class="ui-g">
+                <div class="ui-g-12">
+                    <p:dataTable id="departamentos" var="departamento" 
+                                 value="#{departamentoView.departametos}" 
+                                 rowKey="#{departamento.id}" 
+                                 scrollable="true" scrollWidth="100%" scrollHeight="300"
+                                 paginator="true" rows="10" paginatorPosition="bottom">
+                        <f:facet name="header">
+                            <center>
+                                <b>Departamentos</b>
+                            </center>                            
+                        </f:facet>
+                        <p:column headerText="Id">
+                            <h:outputText value="#{departamento.id}" />
+                        </p:column>
+                        <p:column headerText="Codigo">
+                            <h:outputText value="#{departamento.departamentoCodigo}" />
+                        </p:column>
+                        <p:column headerText="Nombre">
+                            <h:outputText value="#{departamento.departamentoNombre}" />
+                        </p:column>
+                        <p:column headerText="Fecha Creación">
+                            <h:outputText value="#{departamento.fechaHoraCrea}">
+                                <f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT-5"/>
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Fecha Edición">
+                            <h:outputText value="#{departamento.fechaHoraModifica}">
+                                <f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT-5"/>
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Ver">
+                            <p:commandButton type="button" 
+                                             styleClass="rounded-button"
+                                             icon="pi pi-eye" onclick="PF('dialog-departamento').show();">
+                                <p:ajax event="click"
+                                        update="form-departamento:panel-departamento"
+                                        listener="#{departamentoView.opcionDepartamento(departamento,'ver')}" />
+                            </p:commandButton>
+                        </p:column>
+                        <p:column headerText="Modificar">
+                            <p:commandButton type="button" 
+                                             styleClass="ui-button-warning rounded-button" 
+                                             icon="pi pi-user-edit" onclick="PF('dialog-departamento').show();">
+                                <p:ajax event="click"
+                                        update="form-departamento:panel-departamento"
+                                        listener="#{departamentoView.opcionDepartamento(departamento,'modificar')}" />
+                            </p:commandButton>
+                        </p:column>
+                        <p:column headerText="Eliminar">
+                            <p:commandButton icon="pi pi-trash" action="#{departamentoView.eliminarDepartamento(departamento)}"
+                                             styleClass="ui-button-danger rounded-button" 
+                                             immediate="true"
+                                             update="form-departamento:growl departamentos" >
+                                <p:confirm header="Confirmación" message="¿Desea eliminar el departamento #{departamento.id}?" icon="pi pi-exclamation-triangle"/>
+                            </p:commandButton>
+                        </p:column>
+                        <f:facet name="footer">
+                            Cantidad departmanetos: #{departamentoView.departametos.size()}
+                            <p:commandButton type="button" value="Nuevo Departamento"  
+                                             icon="pi pi-plus" iconPos="right" 
+                                             onclick="PF('dialog-departamento').show();" style="float:right;">
+                                <p:ajax event="click"
+                                        update="form-departamento:panel-departamento"
+                                        listener="#{departamentoView.opcionDepartamento(null,'nuevo')}" />
+                            </p:commandButton>
+                        </f:facet>
+                    </p:dataTable>
+                </div>
+            </div>
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="400">
+                <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+                <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" />
+            </p:confirmDialog>
+
+            <p:dialog header="Departamento" widgetVar="dialog-departamento" width="60%">
+                <div class="ui-g">
+                    <h:panelGroup id="panel-departamento">
+
+                        <div class="ui-g-6">
+                            <h:outputLabel for="departamento-codigo" value="Código Departamento:" /><span style="color: red">*</span>
+                            <div class="ui-inputgroup">
+                                <span class="ui-inputgroup-addon"><i class="pi pi-align-justify"></i></span>
+                                <p:inputText id="departamento-codigo" 
+                                             disabled="#{departamentoView.opcionModal eq 'ver'}"
+                                             required="true"  requiredMessage="Es necesario el código departamento"
+                                             value="#{departamentoView.departamento.departamentoCodigo}" 
+                                             placeholder="Codigo Departamento" 
+                                             style="width: 100%"/>      
+                            </div>
+                        </div>
+                        <div class="ui-g-6">
+                            <h:outputLabel for="departamento-nombre" value="Nombre Departamento:" /><span style="color: red">*</span>
+                            <div class="ui-inputgroup">
+                                <span class="ui-inputgroup-addon"><i class="pi pi-align-justify"></i></span>
+                                <p:inputText id="departamento-nombre" 
+                                             disabled="#{departamentoView.opcionModal eq 'ver'}"
+                                             required="true"  requiredMessage="Es necesario el nombre departamento"
+                                             value="#{departamentoView.departamento.departamentoNombre}" 
+                                             placeholder="Nombre Departamento" 
+                                             style="width: 100%"/>      
+                            </div>
+                        </div>
+                        <ui:fragment rendered="#{departamentoView.opcionModal eq 'modificar' 
+                                                 || departamentoView.opcionModal eq 'ver'}">
+                            <div class="ui-g-6">
+                                <h:outputLabel for="fecha-creacion" value="Fecha Creación:" />
+                                <div class="ui-inputgroup">
+                                    <span class="ui-inputgroup-addon"><i class="pi pi-calendar"></i></span>
+                                    <p:inputText id="fecha-creacion" 
+                                                 disabled="true"
+                                                 value="#{departamentoView.departamento.fechaHoraCrea}" 
+                                                 style="width: 100%">
+                                        <f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT-5"/>
+                                    </p:inputText>     
+                                </div>
+                            </div>
+                            <div class="ui-g-6">
+                                <h:outputLabel for="fecha-edicion" value="Ultima Fecha Edición:" />
+                                <div class="ui-inputgroup">
+                                    <span class="ui-inputgroup-addon"><i class="pi pi-calendar"></i></span>
+                                    <p:inputText id="fecha-edicion" 
+                                                 disabled="true"
+                                                 value="#{departamentoView.departamento.fechaHoraModifica}" 
+                                                 style="width: 100%">
+                                        <f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT-5"/>
+                                    </p:inputText>     
+                                </div>
+                            </div>
+                        </ui:fragment>
+                        <div class="ui-g-12">
+                            <ui:fragment rendered="#{departamentoView.opcionModal eq 'nuevo'}">
+                                <p:commandButton type="button" value="Guardar" 
+                                                 icon="pi pi-save" iconPos="right" style="float:right;">
+                                    <p:ajax event="click" process="@this,departamento-codigo,departamento-nombre" 
+                                            update="panel-departamento growl departamentos"
+                                            listener="#{departamentoView.guardarDepartamento()}" />
+                                </p:commandButton>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{departamentoView.opcionModal eq 'modificar'}">
+                                <p:commandButton type="button" value="Modificar" 
+                                                 icon="pi pi-save" iconPos="right" style="float:right;">
+                                    <p:ajax event="click" process="@this,departamento-codigo,departamento-nombre" 
+                                            update="panel-departamento growl departamentos"
+                                            listener="#{departamentoView.modificarDepartamento()}" />
+                                </p:commandButton>
+                            </ui:fragment>
+                        </div>
+
+                    </h:panelGroup>
+                </div>
+            </p:dialog>
+        </h:form>
+    </h:body>
+</html>
+

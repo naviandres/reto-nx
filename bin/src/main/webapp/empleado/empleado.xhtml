@@ -1,0 +1,295 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <h:head>
+        <title>Empleado</title>
+    </h:head>
+    <h:body>
+        <style>
+            .inputNumber{
+                width: 100%;
+            }
+        </style>
+        <h:form id="form-empleado">
+            <p:menubar>               
+
+                <p:divider layout="vertical"/>
+                <p:menuitem value="Inicio" icon="pi pi-fw pi-angle-left" outcome="/index.xhtml"/>
+
+            </p:menubar>
+            <p:growl id="growl" showDetail="true" />
+            <div class="ui-g">
+                <div class="ui-g-12">
+                    <p:dataTable id="empleados" var="empleado" 
+                                 value="#{empleadoView.lazyEmpleados}"
+                                 lazy="true"
+                                 rowKey="#{empleado.id}" 
+                                 scrollable="true" scrollWidth="100%" scrollHeight="350"
+                                 paginator="true" rows="10" paginatorPosition="bottom">
+                        <f:facet name="header">
+                            <center>
+                                <b>Empleados</b>
+                            </center>                            
+                        </f:facet>
+                        <p:column headerText="Id">
+                            <h:outputText value="#{empleado.id}" />
+                        </p:column>
+                        <p:column headerText="Tipo Documento">
+                            <h:outputText value="#{empleado.documentoTipo}" />
+                        </p:column>
+                        <p:column headerText="Numero Documento">
+                            <h:outputText value="#{empleado.documentoNumero}" />
+                        </p:column>
+                        <p:column headerText="Nombres">
+                            <h:outputText value="#{empleado.nombres}" />
+                        </p:column>
+                        <p:column headerText="Apellidos">
+                            <h:outputText value="#{empleado.apellidos}" />
+                        </p:column>
+                        <p:column headerText="Departamento">
+                            <h:outputText value="#{empleado.departamentosId.departamentoNombre}" />
+                        </p:column>
+                        <p:column headerText="Ciudad">
+                            <h:outputText value="#{empleado.ciudad}" />
+                        </p:column>
+                        <p:column headerText="Dirección">
+                            <h:outputText value="#{empleado.direccion}" />
+                        </p:column>
+                        <p:column headerText="Correo Electrónico">
+                            <h:outputText value="#{empleado.correoElectronico}" />
+                        </p:column>
+                        <p:column headerText="Télefono">
+                            <h:outputText value="#{empleado.telefono}" />
+                        </p:column>                       
+                        <p:column headerText="Fecha Creación">
+                            <h:outputText value="#{empleado.fechaHoraCrea}">
+                                <f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT-5"/>
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Fecha Modifica">
+                            <h:outputText value="#{empleado.fechaHoraModifica}">
+                                <f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT-5"/>
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Ver">
+                            <p:commandButton type="button" 
+                                             styleClass="rounded-button"
+                                             icon="pi pi-eye" onclick="PF('dialog-empleado').show();">
+                                <p:ajax event="click"
+                                        update="form-empleado:panel-empleado"
+                                        listener="#{empleadoView.opcionEmpleado(empleado,'ver')}" />
+                            </p:commandButton>
+                        </p:column>
+                        <p:column headerText="Modificar">
+                            <p:commandButton type="button" 
+                                             styleClass="ui-button-warning rounded-button" 
+                                             icon="pi pi-user-edit" onclick="PF('dialog-empleado').show();">
+                                <p:ajax event="click"
+                                        update="form-empleado:panel-empleado"
+                                        listener="#{empleadoView.opcionEmpleado(empleado,'modificar')}" />
+                            </p:commandButton>
+                        </p:column>
+                        <p:column headerText="Eliminar">
+                            <p:commandButton icon="pi pi-trash" action="#{empleadoView.eliminarEmpleado(empleado)}"
+                                             styleClass="ui-button-danger rounded-button" 
+                                             immediate="true"
+                                             update="form-empleado:growl empleados" >
+                                <p:confirm header="Confirmación" message="¿Desea eliminar el empleado #{empleado.id}?" icon="pi pi-exclamation-triangle"/>
+                            </p:commandButton>
+                        </p:column>
+                        <f:facet name="footer">
+                           Cantidad empleados: #{empleadoView.totalEmpleados}
+                            <p:commandButton type="button" value="Nuevo Empleado"  
+                                             icon="pi pi-plus" iconPos="right" 
+                                             onclick="PF('dialog-empleado').show();" style="float:right;">
+                                <p:ajax event="click"
+                                        update="form-empleado:panel-empleado"
+                                        listener="#{empleadoView.opcionEmpleado(null,'nuevo')}" />
+                            </p:commandButton>
+                        </f:facet>
+                    </p:dataTable>
+                </div>
+            </div>
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="400">
+                <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+                <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" />
+            </p:confirmDialog>
+
+            <p:dialog header="Empleado" widgetVar="dialog-empleado" position="center" width="60%" height="80%">
+                <div class="ui-g">
+                    <h:panelGroup id="panel-empleado">
+
+                        <div class="ui-g-6">
+                            <h:outputLabel for="documento-tipo" value="Tipo Documento:" />
+                            <div class="ui-inputgroup">
+                                <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                                <p:selectOneMenu id="documento-tipo" value="#{empleadoView.empleado.documentoTipo}"
+                                                 disabled="#{empleadoView.opcionModal eq 'ver'}"
+                                                 style="width: 100%" >
+                                    <f:selectItem itemValue="#{null}" itemLabel="Seleccione" noSelectionOption="true"/>
+                                    <f:selectItem itemValue="RC" itemLabel="RC" />
+                                    <f:selectItem itemValue="TI" itemLabel="TI" />
+                                    <f:selectItem itemValue="CC" itemLabel="CC" />
+                                    <f:selectItem itemValue="CE" itemLabel="CE" />
+                                    <p:ajax event="change" process="@this"/>
+                                </p:selectOneMenu>   
+                            </div>
+                        </div>
+                        <div class="ui-g-6">
+                            <h:outputLabel for="empleado-documento" value="Numero Documento:" />
+                            <div class="ui-inputgroup">
+                                <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                                <p:inputNumber id="empleado-documento" padControl="false"
+                                               disabled="#{empleadoView.opcionModal eq 'ver'}"
+                                               value="#{empleadoView.empleado.documentoNumero}" 
+                                               placeholder="Numero Documento" minValue="0"
+                                               style="width: 100%"/>      
+                            </div>
+                        </div>
+                        <div class="ui-g-6">
+                            <h:outputLabel for="empleado-nombre" value="Nombres:" />
+                            <div class="ui-inputgroup">
+                                <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                                <p:inputText id="empleado-nombre" 
+                                             disabled="#{empleadoView.opcionModal eq 'ver'}"
+                                             value="#{empleadoView.empleado.nombres}" 
+                                             placeholder="Nombres" 
+                                             style="width: 100%"/>      
+                            </div>
+                        </div>
+                        <div class="ui-g-6">
+                            <h:outputLabel for="empleado-apellidos" value="Apellidos:" />
+                            <div class="ui-inputgroup">
+                                <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                                <p:inputText id="empleado-apellidos" 
+                                             disabled="#{empleadoView.opcionModal eq 'ver'}"
+                                             value="#{empleadoView.empleado.apellidos}" 
+                                             placeholder="Apellidos" 
+                                             style="width: 100%"/>      
+                            </div>
+                        </div>
+                        <div class="ui-g-6">
+                            <h:outputLabel for="empleado-departamento" value="Departamento:" />
+                            <div class="ui-inputgroup">
+                                <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                                <p:selectOneMenu id="empleado-departamento" 
+                                                 disabled="#{empleadoView.opcionModal eq 'ver'}"
+                                                 value="#{empleadoView.idDepartamento}" dynamic="true" style="width: 100%">
+                                    <f:selectItem itemLabel="Seleccione" itemValue="#{null}" noSelectionOption="true" />
+                                    <f:selectItems value="#{empleadoView.departamentos}" var="departamento" 
+                                                   itemLabel="#{departamento.departamentoCodigo}-#{departamento.departamentoNombre}"
+                                                   itemValue="#{departamento.id}"/>
+                                    <p:ajax event="change" process="@this"/>
+                                </p:selectOneMenu>
+                            </div>
+                        </div>
+                        <div class="ui-g-6">
+                            <h:outputLabel for="empleado-ciudad" value="Ciudad:" />
+                            <div class="ui-inputgroup">
+                                <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                                <p:inputText id="empleado-ciudad" 
+                                             disabled="#{empleadoView.opcionModal eq 'ver'}"
+                                             value="#{empleadoView.empleado.ciudad}" 
+                                             placeholder="Ciudad" 
+                                             style="width: 100%"/>      
+                            </div>
+                        </div>
+                        <div class="ui-g-6">
+                            <h:outputLabel for="empleado-direccion" value="Dirección:" />
+                            <div class="ui-inputgroup">
+                                <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                                <p:inputText id="empleado-direccion" 
+                                             disabled="#{empleadoView.opcionModal eq 'ver'}"
+                                             value="#{empleadoView.empleado.direccion}" 
+                                             placeholder="Dirección" 
+                                             style="width: 100%"/>      
+                            </div>
+                        </div>
+                        <div class="ui-g-6">
+                            <h:outputLabel for="empleado-correo" value="Correo Electrónico:" />
+                            <div class="ui-inputgroup">
+                                <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                                <p:inputText id="empleado-correo" type="email"
+                                             disabled="#{empleadoView.opcionModal eq 'ver'}"
+                                             value="#{empleadoView.empleado.correoElectronico}" 
+                                             placeholder="Correo Electrónico" 
+                                             validatorMessage="Formato de correo invalido."
+                                             style="width: 100%">
+                                    <f:validateRegex 
+                                        pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$" />
+                                </p:inputText>
+                            </div>
+                        </div>
+                        <div class="ui-g-6">
+                            <h:outputLabel for="empleado-telefono" value="Teléfono:" />
+                            <div class="ui-inputgroup">
+                                <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                                <p:inputNumber id="empleado-telefono"  padControl="false"
+                                               disabled="#{empleadoView.opcionModal eq 'ver'}"
+                                               value="#{empleadoView.empleado.telefono}" 
+                                               placeholder="Teléfono" minValue="0"
+                                               styleClass="inputNumber"/>      
+                            </div>
+                        </div>                        
+
+
+                        <ui:fragment rendered="#{empleadoView.opcionModal eq 'modificar' 
+                                                 || empleadoView.opcionModal eq 'ver'}">
+                            <div class="ui-g-6">
+                                <h:outputLabel for="fecha-creacion" value="Fecha Creación:" />
+                                <div class="ui-inputgroup">
+                                    <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                                    <p:inputText id="fecha-creacion" 
+                                                 disabled="true"
+                                                 value="#{empleadoView.empleado.fechaHoraCrea}" 
+                                                 style="width: 100%">
+                                        <f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT-5"/>
+                                    </p:inputText>      
+                                </div>
+                            </div>
+                            <div class="ui-g-6">
+                                <h:outputLabel for="fecha-modifica" value="Ultima Fecha Edición:" />
+                                <div class="ui-inputgroup">
+                                    <span class="ui-inputgroup-addon"><i class="pi pi-user"></i></span>
+                                    <p:inputText id="fecha-modifica" 
+                                                 disabled="true"
+                                                 value="#{empleadoView.empleado.fechaHoraModifica}" 
+                                                 style="width: 100%">
+                                        <f:convertDateTime pattern="yyyy-MM-dd HH:mm" timeZone="GMT-5"/>
+                                    </p:inputText>    
+                                </div>
+                            </div>
+                        </ui:fragment>
+                        <div class="ui-g-12">
+                            <ui:fragment rendered="#{empleadoView.opcionModal eq 'nuevo'}">
+                                <p:commandButton type="button" value="Guardar" 
+                                                 icon="pi pi-save" iconPos="right" style="float:right;">
+                                    <p:ajax event="click" 
+                                            process="@this,empleado-documento,empleado-nombre,empleado-apellidos,empleado-ciudad,empleado-direccion,empleado-correo,empleado-telefono"
+                                            update="panel-empleado growl empleados"
+                                            listener="#{empleadoView.guardarEmpleado()}" />
+                                </p:commandButton>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{empleadoView.opcionModal eq 'modificar'}">
+                                <p:commandButton type="button" value="Modificar" 
+                                                 icon="pi pi-save" iconPos="right" style="float:right;">
+                                    <p:ajax event="click" 
+                                            process="@this,empleado-documento,empleado-nombre,empleado-apellidos,empleado-ciudad,empleado-direccion,empleado-correo,empleado-telefono"
+                                            update="panel-empleado growl empleados"
+                                            listener="#{empleadoView.modificarEmpleado()}" />
+                                </p:commandButton>
+                            </ui:fragment>
+                        </div>
+
+                    </h:panelGroup>
+                </div>
+            </p:dialog>
+        </h:form>
+    </h:body>
+</html>
+
